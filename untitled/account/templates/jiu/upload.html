@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Python文件上传</title>
+</head>
+<body>
+        <!-- Upload form. Note enctype attribute! -->
+        <form action="/upload/" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <p>{{ form.non_field_errors }}</p>
+
+            <p>{{ form.file.label }} {{ form.file.help_text }}</p>
+
+            <p>
+                {{ form.file.errors }}
+                {{ form.file }}
+            </p>
+
+            <p><input type="submit" value="Upload"/></p>
+        </form>
+</body>
+</html>

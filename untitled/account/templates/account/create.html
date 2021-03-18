@@ -1,0 +1,86 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title> 创建用户组 </title>
+        <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+		<script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+        <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+        <style>
+            body {
+                background-image: url({% static 'account/image/login1.jpg' %});
+                background-size: cover;
+                background-repeat: no-repeat;
+            }
+            #ad-container {
+                margin-top: 30%;
+                margin-left: 5%;
+                position: absolute;
+                color: whitesmoke;
+                border-radius: 20%;
+                font-size: 50px;
+                font-weight: bolder;
+            }
+            #form-container {
+                position: absolute;
+                margin-top: 8%;
+                margin-left: 37%;
+                height: 55%;
+                width: 24%;
+                border-radius: 2%;
+                background-color:rgba(255, 255, 255, 0.8);
+            }
+            #form-container > form {
+                width: 90%;
+                margin-left: 5%;
+            }
+            #find-btn {
+                margin-left: 5%;
+                width: 90%;
+                margin-top: 5%;
+            }
+            #form-container > form > #warning {
+                border-color:crimson;
+                background-color: rgba(255,255,255,0.4);
+                font-size: middle;
+                color: crimson;
+                margin-left: 3%;
+            }
+            #form-container > #index-link {
+                font-size: large;
+                margin-left: 70%;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div id="ad-container">
+            安全网盘
+        </div>
+
+        <div id="form-container">
+                <form action="/create/" method="POST" id="forget">
+                    <h3 class="form-title center-block">创建用户组</h3>
+                    {% if message %}
+                        <div class="alert alert-warning" id="warning">{{ message }}</div>
+                    {% endif %}
+                {% csrf_token %}
+              <div class="form-group">
+                        <label for="gname">组名</label>
+                        <input type="text" class="form-control" placeholder="请输入您要创建的组名"
+                        name="groupname" id="gname" />
+                    </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-info" id="share-btn">
+                        确定
+                    </button>
+
+                </div>
+            </form>    
+            <a href="/index/" id="index-link">返回首页</a>
+        </div>
+    </body>
+</html>

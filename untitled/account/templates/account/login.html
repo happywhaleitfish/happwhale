@@ -1,0 +1,155 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title> 安全网盘登录 </title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="../../static/account/js/DHexchange.js"></script>
+    <!--<script src="../../static/account/js/formdataencrypt.js"></script>-->
+    <style>
+        @keyframes back-ani { /* 用于改变背景 */
+            0% {
+                background-image: url({% static 'account/image/login1.jpg' %});
+
+                background-repeat: no-repeat;
+                background-size: cover;
+            }
+            25% {
+                background-image: url({% static 'account/image/login2.jpg' %});
+
+                background-repeat: no-repeat;
+                background-size: cover;
+            }
+            50% {
+                background-image: url({% static 'account/image/login3.jpg' %});
+
+                background-repeat: no-repeat;
+                background-size: cover;
+            }
+            75% {
+                background-image: url({% static 'account/image/login4.jpg' %});
+
+                background-repeat: no-repeat;
+                background-size: cover;
+            }
+            100% {
+                background-image: url({% static 'account/image/login1.jpg' %});
+
+                background-repeat: no-repeat;
+                background-size: cover;
+            }
+        }
+
+        body {
+            animation: back-ani 20s;
+            animation-iteration-count: infinite;
+        }
+
+        #ad {
+            font-size: xxx-large;
+            color: whitesmoke;
+            position: absolute;
+            opacity: 0.9;
+            margin-top: 30%;
+            margin-left: 10%;
+            font-weight: bolder;
+        }
+
+        #form-container {
+            position: absolute;
+            margin-top: 8%;
+            margin-left: 58%;
+            height: 75%;
+            width: 24%;
+            border-radius: 2%;
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+
+        #form-container > form {
+            width: 90%;
+            margin-left: 5%;
+        }
+
+        #login-btn {
+            margin-top: 5%;
+            margin-left: 5%;
+            width: 90%;
+        }
+
+        #form-container > form > #warning {
+            border-color: crimson;
+            background-color: rgba(255, 255, 255, 0.4);
+            font-size: middle;
+            color: crimson;
+            margin-left: 3%;
+        }
+
+        #form-container > a {
+            font-size: large;
+        }
+
+        #form-container > .form-group {
+
+
+        }
+
+        #form-container > #forget-link {
+            margin-left: 10%;
+            margin-right: 40%;
+        }
+    </style>
+
+
+</head>
+
+<body>
+
+<div id="form-container">
+    <form action="/login/" method="POST" class="form-horizontal" id="login">
+        <h3 class="form-title center-block">账号密码登录</h3>
+        <!--
+                    {% if message %}
+                         <div class="alert alert-warning">{{ message }}</div>
+                    {% endif %}
+-->
+        {% if login_form.captcha.errors %}
+            <div class="alert alert-warning" id="warning">{{ login_form.captcha.errors }}</div>
+        {% elif message %}
+            <div class="alert alert-warning" id="warning">{{ message }}</div>
+        {% endif %}
+
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="uname">用户名</label>
+            <input type="text" class="form-control" placeholder="用户名"
+                   name="username" id="uname"/>
+        </div>
+
+        <div class="form-group">
+            <label for="pwd">密码</label>
+            <input type="password" class="form-control" placeholder="密码"
+                   name="password" id="pwd"/>
+        </div>
+        <div class="form-group">{{ login_form.username.errors }}
+            {{ login_form.captcha.label_tag }}
+            {{ login_form.captcha }}
+        </div>
+        <a href="/login/">看不清，换一张</a>
+        <div class="form-group">
+            <button class="btn btn-info" id="login-btn" onclick="exchange()">登录</button>
+        </div>
+    </form>
+    <a href="/forget/" id="forget-link">忘记密码</a>
+    <a href="/register/">注册</a>
+</div>
+
+</div>
+
+</body>
+</html>
+

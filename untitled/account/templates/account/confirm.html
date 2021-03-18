@@ -1,0 +1,63 @@
+{% load static %}
+<!DOCTYPE html>
+    <head>
+        <meta charset="utf-8" />
+        <title> SecMessage </title>
+
+        <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+		<script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+        <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+        <style>
+            body {
+                background-image: url({% static 'account/image/login1.jpg' %});
+                background-size: cover;
+                background-repeat: no-repeat;
+            }
+            #message-container {
+                position: absolute;
+                height: 40%;
+                width: 30%;
+                margin-top: 15%;
+                margin-left: 35%;
+                background-color: rgba(255,255,255,0.7);
+                border-radius: 20%;
+                text-align: center;
+
+            }
+            #message-container > #ad-item {
+                color: darkblue;
+                font-size: xx-large; 
+                margin-top: 10%;
+                font-weight: bolder;
+            }
+            #message-container > #message-text{
+                color: blue;
+                font-size: x-large;
+                margin-top: 10%;
+                font-weight: bolder;
+            }
+        </style>
+
+        <script>
+            window.onload = function() {
+                setTimeout(goback, 5000);
+                function goback() {
+                    window.history.go(-1);
+                }
+            }
+        </script>
+    </head>
+
+    <body>
+        <div id="message-container">
+            <div id="message-text">
+                {{ message }}<br />
+                2秒后返回
+            </div>
+        </div>
+     <script>
+        window.setTimeout("window.location='/login/'",2000);
+    </script>
+    </body>
+</html>
