@@ -1,12 +1,109 @@
 
+---
 version: 2.1
-jobs:
-  build:
+
+executors:
+  dev-env:
+    environment:
+      DOCKER_CLAIR_TEMP_IMAGE: simonsdave/clair-cicd-clair:bindle
+      DOCKER_DATABASE_TEMP_IMAGE: simonsdave/clair-cicd-database:bindle
     docker:
-      - image: alpine:3.7
+      - image: simonsdave/bionic-dev-env:v0.6.14
+        auth:
+          username: $DOCKER_EXECUTOR_DOCKERHUB_USERNAME
+          password: $DOCKER_EXECUTOR_DOCKERHUB_PASSWORD
+
+jobs:
+  build_test_and_deploy:
+    working_directory: ~/repo
+    executor: dev-env
     steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "requirements.txt" }}
+            - v1-dependencies-
       - run:
-          name: The First Step
+          name: Install Python prerequisites
+          command: pip3 install --requirement requirements.txt
+      - save_cache:
+          paths:
+            - ./env
+          key: v1-dependencies-{{ checksum "requirements.txt" }}
+      - run:
+          name: Lint Python Files
+          command: run-flake8.sh
+      - run:
+          name: PyCQA/bandit
+          command: run-bandit.sh
+      - run:
+          name: Lint Shell Scripts
+          command: run-shelllint.sh --verbose
+      - run:
+          name: Lint Markdown Files
+          command: run-markdownlint.sh --verbose
+      - run:
+          name: Lint YAML Files
+          command: run-yamllint.sh --verbose
+      - run:
+          name: Lint JSON Files
+          command: run-jsonlint.sh --verbose
+      - run:
+          name: Scan repo for passwords, private keys, etc.
+          command: run-repo-security-scanner.sh
+      - run:
+          name: Run Unit Tests
+          command: run-unit-tests.sh
+      - run:
+          name: Upload Unit Test Coverage Data to Codecov
+          command: codecov
+      - run:
+          name: Build README.rst
+          command: build-readme-dot-rst.sh
+      - run:
+          name: Build Python Packages
+          command: build-python-package.sh
+      - setup_remote_docker:
+          version: 19.03.13
+      - run:
+          name: Build Docker Images
           command: |
-            echo 'Hello World!'
-            echo 'This is the delivery pipeline
+            ./dockerfiles/clair/build-docker-image.sh "dist/clair-cicd-$(python-version.sh).tar.gz" "${DOCKER_CLAIR_TEMP_IMAGE}"
+            ./dockerfiles/database/build-docker-image.sh "${DOCKER_DATABASE_TEMP_IMAGE}"
+      - run:
+          name: Run Integration Tests
+          command: ./tests/integration/docker-image-integration-tests.sh "${DOCKER_CLAIR_TEMP_IMAGE}" "${DOCKER_DATABASE_TEMP_IMAGE}"
+      - deploy:
+          name: Push Docker Images to DockerHub
+          command: |
+            if [[ "${CIRCLE_BRANCH}" == "master" ]]; then
+              ./dockerfiles/clair/tag-and-push-docker-image.sh "${DOCKER_CLAIR_TEMP_IMAGE}" "latest" "${DOCKER_PASSWORD}"
+              ./dockerfiles/database/tag-and-push-docker-image.sh "${DOCKER_DATABASE_TEMP_IMAGE}" "latest" "${DOCKER_PASSWORD}"
+            fi
+            if [[ "${CIRCLE_BRANCH}" =~ ^release-([0-9]+.)*[0-9]+$ ]]; then
+              ./dockerfiles/clair/tag-and-push-docker-image.sh "${DOCKER_CLAIR_TEMP_IMAGE}" "v${CIRCLE_BRANCH##release-}" "${DOCKER_PASSWORD}"
+              ./dockerfiles/database/tag-and-push-docker-image.sh "${DOCKER_DATABASE_TEMP_IMAGE}" "v${CIRCLE_BRANCH##release-}" "${DOCKER_PASSWORD}"
+            fi
+
+workflows:
+  version: 2
+  commit:
+    jobs:
+      - build_test_and_deploy:
+          context:
+            - clair-cicd
+            - docker-executor
+  three_days_per_week:
+    triggers:
+      - schedule:
+          # https://crontab.guru/ is super useful in decoding the value of the cron key
+          cron: "0 3 * * 1,3,5"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - build_test_and_deploy:
+          context:
+            - clair-cicd
+            - docker-executor
